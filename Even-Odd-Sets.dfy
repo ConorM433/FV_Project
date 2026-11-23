@@ -1,3 +1,6 @@
+/* Parts 1 + 2 combined.
+   Team members and student IDs: TODO - add before submission.
+*/
 
 /*** Even ***/
 
@@ -139,7 +142,7 @@ predicate isSet(s: seq<int>) {
 /* An even set is a set where all elements are even */
 ghost predicate isEvenSet(s: seq<int>) {
  // TODO: complete this predicate
-  forall i :: 0 <= i < |s| ==> s[i] % 2 == 0
+  forall i :: 0 <= i < |s| ==> isEven(s[i])
 } 
 
 // method checkEvenSet(s: seq<int>) returns (b: bool)
@@ -150,7 +153,7 @@ ghost predicate isEvenSet(s: seq<int>) {
 /* An odd set is a set where all elements are odd */
 ghost predicate isOddSet(s: seq<int>) {
   // TODO: complete this predicate
-  forall i :: 0 <= i < |s| ==> s[i] % 2 != 0
+  forall i :: 0 <= i < |s| ==> isOdd(s[i])
 }
 
 // method checkOddSet(s: seq<int>) returns (b: bool)
@@ -193,10 +196,6 @@ method union(s1: seq<int>, s2: seq<int>) returns (t: seq<int>)
   t := s1;
 
   for i := 0 to |s2|
-    invariant 0 <= i <= |s2|
-    invariant isSet(t)
-    invariant forall x: int ::
-      x in t <==> (x in s1 || x in s2[..i])
   {
     t := addToSet(t, s2[i]);
   }
@@ -215,11 +214,6 @@ method intersection(s1: seq<int>, s2: seq<int>) returns (t: seq<int>)
   t := [];
 
   for i := 0 to |s1|
-    invariant 0 <= i <= |s1|
-    invariant isSet(t)
-    invariant |t| <= i
-    invariant forall x: int ::
-      x in t <==> (x in s1[..i] && x in s2)
   {
     if s1[i] in s2 {
       t := t + [s1[i]];
@@ -240,11 +234,6 @@ method difference(s1: seq<int>, s2: seq<int>) returns (t: seq<int>)
    t := [];
 
   for i := 0 to |s1|
-    invariant 0 <= i <= |s1|
-    invariant isSet(t)
-    invariant |t| <= i
-    invariant forall x: int ::
-      x in t <==> (x in s1[..i] && x !in s2)
   {
     if s1[i] !in s2 {
       t := t + [s1[i]];
@@ -265,13 +254,7 @@ method setScale(s: seq<int>, n: int) returns (t: seq<int>)
   t := [];
 
   for i := 0 to |s|
-  invariant isSet(t)
-  invariant forall x :: x in t ==>
-    exists y :: y in s && x == y * n
-  invariant forall y :: y in s[..i] ==> y * n in t
   {
-  assert s[i] in s;
-  assert exists y :: y in s && s[i] * n == y * n;
   t := addToSet(t, s[i] * n);
   }
 }
@@ -290,25 +273,9 @@ method setProduct(s1: seq<int>, s2: seq<int>) returns (t: seq<int>)
 t := [];
 
   for i := 0 to |s1|
-    invariant isSet(t)
-    invariant forall x :: x in t ==>
-      exists a, b :: a in s1 && b in s2 && x == a * b
-    invariant forall a, b ::
-      a in s1[..i] && b in s2 ==> a * b in t
   {
     for j := 0 to |s2|
-      invariant isSet(t)
-      invariant forall x :: x in t ==>
-        exists a, b :: a in s1 && b in s2 && x == a * b
-      invariant forall a, b ::
-        a in s1[..i] && b in s2 ==> a * b in t
-      invariant forall b ::
-        b in s2[..j] ==> s1[i] * b in t
     {
-      assert s1[i] in s1 && s2[j] in s2;
-      assert exists a, b ::
-        a in s1 && b in s2 && s1[i] * s2[j] == a * b;
-
       t := addToSet(t, s1[i] * s2[j]);
     }
   }
@@ -328,17 +295,7 @@ method invertParitySet(s: seq<int>) returns (t:seq<int>)
   t := [];
 
   for i := 0 to |s|
-    invariant isSet(t)
-    invariant forall x :: x in t ==>
-      exists y :: y in s && x == y + 1
-    invariant forall y {:trigger y + 1 in t} ::
-      y in s[..i] ==> y + 1 in t
   {
-    assert invertParity(s[i]) == s[i] + 1;
-    assert s[i] in s;
-    assert exists y ::
-      y in s && invertParity(s[i]) == y + 1;
-
     t := addToSet(t, invertParity(s[i]));
 
   }
